@@ -1,0 +1,69 @@
+@startuml FoodoModel
+scale 1.5
+skinparam shadowing false
+
+object User {
+    username
+    password
+}
+
+object Customer {
+}
+
+object Location {
+    long
+    lat
+}
+
+object Meal {
+    name
+    price
+    description
+}
+
+object Menu {
+}
+
+object Restaurant {
+    name
+}
+
+object Driver {
+}
+
+object OrderStatus {
+}
+
+object Order {
+    delivery_price
+    meal_price
+    total_price
+}
+
+object Card {
+    card_number
+    exp_date
+    cvv
+}
+
+object RestaurantCatalog {
+}
+
+Customer --|> User
+Driver --|> User
+Restaurant --|> User
+User o-- Location
+Meal --o Menu
+Menu --o Restaurant
+Order <-- Customer : create/pay
+Order <-- Driver : get/complete
+Order <-- Restaurant : get/prepare
+OrderStatus --o Order
+Meal --o Order
+Customer o-- Card
+RestaurantCatalog o-- Restaurant
+Menu <-- Customer : query
+RestaurantCatalog <-- Customer : query
+Order o-- User
+
+@enduml
