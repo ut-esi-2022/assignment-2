@@ -12,4 +12,8 @@ Assignment 2 description is available at https://courses.cs.ut.ee/MTAT.03.229/20
 
 ## Task 2. The Integrated Model
 
-![](out/integrated-model/IntegratedModel.png)
+With bounded contexts:
+![](out/integrated-model_2/IntegratedModel2.png)
+
+Without bounded contexts:
+![](out/integrated-model_2_nobcs/IntegratedModel2NoContexts.png)

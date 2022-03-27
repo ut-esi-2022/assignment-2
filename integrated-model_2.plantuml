@@ -1,0 +1,199 @@
+@startuml IntegratedModel2Polyline
+scale 1.5
+skinparam shadowing false
+skinparam monochrome true
+' skinparam linetype ortho
+skinparam linetype polyline
+
+rectangle "Takso System" <<context map>> {
+    rectangle "User Service" as UserService <<bounded context>> {
+        entity "User Catalog" as UserCatalog <<repository>> {
+        }
+
+        entity User <<entity>> {
+            Name
+            Phone
+            Email
+        }
+
+        UserCatalog *-- User
+    }
+
+    rectangle "Customer Service" as CustomerService <<bounded context>> {
+        entity "Customer Catalog" as CustomerCatalog <<repository>>
+
+        entity Customer <<entity>> {
+        }
+
+        enum "Status" as CustomerStatus <<value object>> {
+            ACTIVEL: Status
+            INACTIVE: Status
+        }
+
+        CustomerCatalog *-- Customer
+        Customer *-- CustomerStatus
+    }
+
+    rectangle "Driver Service" as DriverService <<bounded context>> {
+        entity "Driver Catalog" as DriverCatalog <<repository>>
+
+        entity Driver <<entity>> {
+        }
+
+        enum "Status" as DriverStatus <<value object>> {
+            AVAILABLE: Status
+            UNAVAILABLE: Status
+        }
+
+        DriverCatalog *-- Driver
+        Driver *-- DriverStatus
+    }
+
+    rectangle "Ride Service" as RideService <<bounded context>> {
+        entity "Ride Catalog" as RideCatalog <<repository>>
+
+        entity Ride <<entity>> {
+            Created timestamp
+            Price
+            Estimated arrival time
+        }
+
+        entity Location <<value object>> {
+            Latitude
+            Longitude
+        }
+
+        enum "Status" as RideStatus <<value object>> {
+            PENDING: Status
+            ACCEPTED: Status
+            IN PROGRESS: Status
+            COMPLETED: Status
+            CANCELLED: Status
+        }
+
+        User <|-- Customer
+        User <|-- Driver
+
+        Ride *-- RideStatus
+
+        RideCatalog *-- Ride
+        Ride *-- Location
+        Driver --> Ride : chooses
+        Customer --> Ride : orders
+    }
+
+    rectangle "Wallet Service" as WalletService <<bounded context>> {
+        entity "Wallet Catalog" as TaksoBank <<repository>> {
+        }
+
+        entity Wallet <<entity>> {
+            Balance
+        }
+
+        TaksoBank o-- Wallet
+        User --> Wallet : has
+    }
+}
+
+hide <<entity>> circle
+hide <<entity>> methods
+hide <<value object>> circle
+hide <<value object>> methods
+hide <<repository>> circle
+hide <<repository>> methods
+hide <<repository>> methods
+
+
+rectangle "Foodo System" as FoodoSystem <<context map>> {
+    rectangle "User Service" as UserServiceFoodo <<bounded context>> {
+        entity "User" as UserFoodo <<entity>> {
+            Username
+            Password
+        }
+
+        entity "Location" as LocationFoodo <<value object>> {
+            Latitude
+            Longitude
+        }
+    }
+
+    rectangle "Customer Service" as CutomerServiceFoodo <<bounded context>> {
+        entity "Customer" as CustomerFoodo <<entity>> {
+        }
+
+
+    }
+
+    rectangle "Payment Service" as PaymentServiceFoodo <<bounded context>> {
+        entity "Card" as CardFoodo <<entity>>{
+            Card number
+            Expiration date
+            CVV
+        }
+    }
+
+    rectangle "Order Service" as OrderServiceFoodo <<bounded context>> {
+        entity "Order" as OrderFoodo <<entity>> {
+            Delivery price
+            Meal price
+            Total price
+        }
+
+        enum "OrderStatus" as OrderStatusFoodo <<value object>> {
+            PENDING: Status
+            ACCEPTED: Status
+            IN PROGRESS: Status
+            COMPLETED: Status
+            CANCELLED: Status
+        }
+    }
+
+    rectangle "Restaurant Service" as RestaurantServiceFoodo <<bounded context>> {
+        entity RestaurantCatalog <<repository>> {
+        }
+
+        entity Restaurant <<entity>> {
+        }
+
+        entity Meal <<entity>> {
+            name
+            price
+            description
+        }
+
+        entity Menu <<entity>> {
+        }
+
+        RestaurantCatalog o-- Restaurant
+        Restaurant o-- Menu
+        Menu o-- Meal
+    }
+
+    rectangle "Delivery Service" as DeliveryServiceFoodo <<bounded context>> {
+        entity "Driver" as DriverFoodo <<entity>> {
+        }
+    }
+
+    CustomerFoodo --|> UserFoodo
+    DriverFoodo --|> UserFoodo
+    Restaurant --|> UserFoodo
+    UserFoodo *-- LocationFoodo
+    OrderFoodo <-- CustomerFoodo : creates, pays for
+    OrderFoodo <-- DriverFoodo : takes, completes
+    OrderFoodo <-- Restaurant : receives, completes
+    OrderFoodo o-- OrderStatusFoodo
+    Meal --o OrderFoodo
+    CustomerFoodo o-- CardFoodo
+
+    Menu <-- CustomerFoodo : query
+    RestaurantCatalog <-- CustomerFoodo : query
+    OrderFoodo o-- UserFoodo
+}
+
+CustomerFoodo --> Wallet : has
+
+Driver --> OrderFoodo : gets, completes
+
+User --> UserFoodo : has data about
+
+@enduml
