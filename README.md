@@ -13,7 +13,7 @@ Source | https://github.com/ut-esi-2022/assignment-2
 ![](out/takso-model/TaksoModel.png)
 
 ### System 2: Foodo Model
-![](out/foodo-model/FoodoModel.png)
+![](out/foodo-model/FoodoModel2.png)
 
 ## Task 2. The Integrated Model
 
