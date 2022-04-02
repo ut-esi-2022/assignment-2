@@ -1,0 +1,96 @@
+@startuml
+scale 1.5
+skinparam shadowing false
+
+rectangle "Foodo System" as FoodoSystem <<context map>> {
+
+  rectangle "User Service" <<bounded context>> {
+  
+    entity User <<entity>> {
+        username
+        password
+    }
+    
+    entity Location <<value object>> {
+        long
+        lat
+    }
+    
+  }
+
+  rectangle "Customer Service" as CutomerServiceFoodo <<bounded context>> {
+  
+    entity Customer <<entity>> {}
+    
+   }
+
+  rectangle "Delivery Service" as DeliveryServiceFoodo <<bounded context>> {
+  
+    entity Driver <<entity>> {}
+    
+  }
+
+
+  rectangle "Order Service" as OrderServiceFoodo <<bounded context>> {
+  
+    entity Order <<entity>> {
+        delivery_price
+        meal_price
+        total_price
+    }
+    
+    enum OrderStatus <<value object>> {
+     PENDING: Status
+     ACCEPTED: Status
+     IN PROGRESS: Status
+     COMPLETED: Status
+     CANCELLED: Status
+    }
+    
+  }
+
+  rectangle "Payment Service" as PaymentServiceFoodo <<bounded context>> {
+  
+    entity Card <<entity>> {
+        card_number
+        exp_date
+        cvv
+    }
+
+  }
+  rectangle "Restaurant Service" as RestaurantServiceFoodo <<bounded context>> {
+  
+    entity RestaurantCatalog <<repository>> {}
+    
+    entity Meal <<entity>> {
+        name
+        price
+        description
+    }
+
+    entity Menu <<entity>> {}
+
+    entity Restaurant <<entity>> {
+        name
+    }
+    
+  }
+
+  Customer --|> User
+  Driver --|> User
+  Restaurant --|> User
+  User o-- Location
+  Meal --o Menu
+  Menu --o Restaurant
+  Order <-- Customer : create/pay
+  Order <-- Driver : get/complete
+  Order <-- Restaurant : get/prepare
+  OrderStatus --o Order
+  Meal --o Order
+  Customer o-- Card
+  RestaurantCatalog o-- Restaurant
+  Menu <-- Customer : query
+  RestaurantCatalog <-- Customer : query
+  Order o-- User
+}
+@enduml
