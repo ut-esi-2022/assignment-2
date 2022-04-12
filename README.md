@@ -34,6 +34,9 @@ With bounded contexts:
 Without bounded contexts:
 ![](out/integrated-model_2_nobcs/IntegratedModel2NoContexts.png)
 
+Final attempt:
+![](out/integrated-model_3/IntegratedModel3.png)
+
 ## Appendix I. Relevant Requirements From Assignment 1
 
 CF010. As a user (driver, customer, restaurant, system operator), I want to be able to register in Takso or Foodo, also login and logout, so that I could use the service.

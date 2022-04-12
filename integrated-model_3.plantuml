@@ -1,0 +1,250 @@
+@startuml IntegratedModel3
+scale 1.5
+skinparam shadowing false
+skinparam monochrome true
+' skinparam linetype ortho
+' skinparam linetype polyline
+
+rectangle "Takso System" <<context map>> {
+    entity "User Catalog" as UserCatalog <<interface>> {
+        getAllUsers() : User[]
+        getUserById(id: string) : User
+        addUser(user: User)
+        removeUser(id: string)
+        authenticate(email: string, password: string) : User
+    }
+    entity "User" as UserTakso <<entity>> <<aggregate root>> {
+        ID
+        Name
+        Phone
+        Email
+        Username
+        Password
+        asDriver() : Driver
+        asCustomer() : Customer
+        getWallet() : Wallet
+        addWallet(wallet: Wallet)
+        removeWallet(id: string)
+    }
+    UserCatalog o-- UserTakso
+
+    entity "Customer Catalog" as CustomerCatalog <<interface>> {
+        getAllCustomers() : Customer[]
+        getCustomerById(id: string) : Customer
+        getCustomberByEmail(email: string) : Customer
+        addCustomer(customer: Customer)
+        removeCustomer(id: string)
+    }
+    entity "Customer" as CustomerTakso <<entity>> <<aggregate root>> {
+        requestRide(ride: Ride)
+        cancelRide(id: string)
+    }
+    enum "Status" as CustomerStatus <<value object>> {
+        ACTIVE: Status
+        INACTIVE: Status
+    }
+    CustomerCatalog o-- CustomerTakso
+    CustomerTakso *-- CustomerStatus
+
+    entity "Driver Catalog" as DriverCatalog <<interface>> {
+        getAllDrivers() : Driver[]
+        getDriverById(id: string) : Driver
+        getDriverByEmail(email: string) : CustomerTakso
+        addDriver(driver: Driver)
+        removeDriver(id: string)
+    }
+    entity "Driver" as DriverTakso <<entity>> <<aggregate root>> {
+        listRides() : Ride[]
+        getRide(id: string)
+        completeRide(id: string)
+        cancelRide(id: string)
+        listOrders() : Order[]
+        takeOrder(id: string)
+        completeOrder(id: string)
+        cancelOrder(id: string)
+    }
+    enum "Status" as DriverStatus <<value object>> {
+        AVAILABLE: Status
+        UNAVAILABLE: Status
+    }
+    DriverCatalog o-- DriverTakso
+    DriverTakso *-- DriverStatus
+
+    entity Ride <<entity>> {
+        ID
+        Created timestamp
+        Start location
+        Destination location
+        Customer ID
+        Driver ID
+        calculatePrice() : double
+        estimateArrivalTime() : datetime
+        finalize()
+    }
+    entity Location <<value object>> {
+        Latitude
+        Longitude
+    }
+    enum "Status" as RideStatus <<value object>> {
+        PENDING: Status
+        ACCEPTED: Status
+        IN PROGRESS: Status
+        COMPLETED: Status
+        CANCELLED: Status
+    }
+    UserTakso <|-- CustomerTakso
+    UserTakso <|-- DriverTakso
+    Ride *-- RideStatus
+    Ride *-- Location
+    DriverTakso --> Ride : gets, completes, earns from
+    CustomerTakso --> Ride : requests, cancels
+    Ride *-- CustomerTakso
+    Ride *-- DriverTakso
+
+    entity Wallet <<entity>> {
+        Balance
+        addMoney(amount: double)
+        charge(amount: double)
+    }
+    UserTakso o-- Wallet
+}
+
+hide <<entity>> circle
+hide <<value object>> circle
+hide <<value object>> methods
+hide <<interface>> circle
+
+
+rectangle "Foodo System" as FoodoSystem <<context map>> {
+    entity "User" as UserFoodo <<entity>> {
+        ID
+        Username
+        Password
+        asCustomer() : Customer
+        asDriver() : Driver
+        getCards() : Card[]
+        addCard(card: Card)
+        removeCard(cardNumber: string)
+    }
+
+    entity "Location" as LocationFoodo <<value object>> {
+        Latitude
+        Longitude
+    }
+
+    entity "Customer" as CustomerFoodo <<entity>> {
+        Address
+        listOrders() : Order[]
+        createOrder(order: Order)
+        cancelOrder(id: string)
+        getLocation() : Location
+        getWallet() : Wallet
+    }
+
+    entity "Card" as CardFoodo <<entity>>{
+        Card number
+        Expiration date
+        CVV
+        addMoney(amount: double)
+        charge(amount: double)
+    }
+
+    entity "Order Catalog" as OrderCatalog <<interface>> {
+        getAllOrders() : Order[]
+        getOrderById(id: string) : Order
+        addOrder(order: Order)
+        removeOrder(id: string)
+    }
+
+    entity "Order" as OrderFoodo <<entity>> {
+        ID
+        Created timestamp
+        Customer ID
+        Restaurant ID
+        Driver ID
+        getCustomer() : Customer
+        getRestaurant() : Restaurant
+        getDriver() : Driver
+        calculateDeliveryPrice() : double
+        calculateMealPrice() : double
+        calculateTotalPrice() : double
+        finalize()
+    }
+
+    enum "OrderStatus" as OrderStatusFoodo <<value object>> {
+        PENDING: Status
+        ACCEPTED: Status
+        IN PROGRESS: Status
+        COMPLETED: Status
+        DELIVERED: Status
+        CANCELLED: Status
+    }
+
+    entity "Order Item" as OrderItem <<entity>> {
+        ID
+        Meal ID
+        Quantity
+        calculatePrice() : double
+    }
+
+    OrderFoodo *-- OrderItem
+
+    entity RestaurantCatalog <<interface>> {
+        getAllRestaurants() : Restaurant[]
+        getRestaurantById(id: string) : Restaurant
+        addRestaurant(restaurant: Restaurant)
+        removeRestaurant(id: string)
+    }
+
+    entity Restaurant <<entity>> {
+        Name
+        Address
+        getLocation() : Location
+        listOrders() : Order[]
+        assignOrder(id: string) : Order
+        completeOrder(id: string)
+        cancelOrder(id: string)
+        listMeal() : Meal[]
+        addMeal(meal: Meal)
+        removeMeal(id: string)
+    }
+
+    entity Meal <<entity>> {
+        ID
+        Name
+        Price
+        Description
+    }
+
+    RestaurantCatalog o-- Restaurant
+    Restaurant o-- Meal
+
+    entity "Driver" as DriverFoodo <<entity>> {
+        listDeliveries() : Order[]
+        takeDeliveryFor(orderID: string)
+        completeDeliveryFor(orderID: string)
+        cancelDeliveryFor(orderID: string)
+    }
+
+    OrderCatalog o-- OrderFoodo
+    OrderItem *-- Meal
+    CustomerFoodo --|> UserFoodo
+    DriverFoodo --|> UserFoodo
+    ' DriverFoodo o-- OrderFoodo
+    ' CustomerFoodo o-- OrderFoodo
+    Restaurant --|> UserFoodo
+    CustomerFoodo *-- LocationFoodo
+    OrderFoodo <-- CustomerFoodo : creates, pays for
+    OrderFoodo *-- DriverFoodo : takes, completes, earns from
+    OrderFoodo *-- Restaurant : receives, completes
+    OrderFoodo *-- OrderStatusFoodo
+    UserFoodo o-- CardFoodo
+    Restaurant *-- LocationFoodo
+}
+
+CustomerFoodo o-- Wallet
+DriverTakso --> OrderFoodo : takes, completes, cancels
+OrderFoodo *-- CustomerFoodo
+UserTakso --> UserFoodo
+
+@enduml
