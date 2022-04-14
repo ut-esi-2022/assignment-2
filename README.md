@@ -37,6 +37,10 @@ Without bounded contexts:
 Final attempt:
 ![](out/integrated-model_3/IntegratedModel3.png)
 
+
+Final attempt with aggregates:
+![](out/integrated-model_3/IntegratedModel3.jpg)
+
 ## Appendix I. Relevant Requirements From Assignment 1
 
 CF010. As a user (driver, customer, restaurant, system operator), I want to be able to register in Takso or Foodo, also login and logout, so that I could use the service.
