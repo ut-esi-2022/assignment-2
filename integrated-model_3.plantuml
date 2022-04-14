@@ -6,15 +6,17 @@ skinparam monochrome true
 ' skinparam linetype polyline
 
 rectangle "Takso System" <<context map>> {
-    entity "User Catalog" as UserCatalog <<interface>> {
+    entity "User Catalog" as UserCatalog <<repository>> {
         getAllUsers() : User[]
         getUserById(id: string) : User
         addUser(user: User)
         removeUser(id: string)
         authenticate(email: string, password: string) : User
     }
-    entity "User" as UserTakso <<entity>> <<aggregate root>> {
+
+    entity "User" as UserTakso <<entity>> {
         ID
+        Foodo ID
         Name
         Phone
         Email
@@ -28,14 +30,14 @@ rectangle "Takso System" <<context map>> {
     }
     UserCatalog o-- UserTakso
 
-    entity "Customer Catalog" as CustomerCatalog <<interface>> {
+    entity "Customer Catalog" as CustomerCatalog <<repository>> {
         getAllCustomers() : Customer[]
         getCustomerById(id: string) : Customer
         getCustomberByEmail(email: string) : Customer
         addCustomer(customer: Customer)
         removeCustomer(id: string)
     }
-    entity "Customer" as CustomerTakso <<entity>> <<aggregate root>> {
+    entity "Customer" as CustomerTakso <<entity>> {
         requestRide(ride: Ride)
         cancelRide(id: string)
     }
@@ -46,14 +48,14 @@ rectangle "Takso System" <<context map>> {
     CustomerCatalog o-- CustomerTakso
     CustomerTakso *-- CustomerStatus
 
-    entity "Driver Catalog" as DriverCatalog <<interface>> {
+    entity "Driver Catalog" as DriverCatalog <<repository>> {
         getAllDrivers() : Driver[]
         getDriverById(id: string) : Driver
         getDriverByEmail(email: string) : CustomerTakso
         addDriver(driver: Driver)
         removeDriver(id: string)
     }
-    entity "Driver" as DriverTakso <<entity>> <<aggregate root>> {
+    entity "Driver" as DriverTakso <<entity>> {
         listRides() : Ride[]
         getRide(id: string)
         completeRide(id: string)
@@ -96,8 +98,8 @@ rectangle "Takso System" <<context map>> {
     UserTakso <|-- DriverTakso
     Ride *-- RideStatus
     Ride *-- Location
-    DriverTakso --> Ride : gets, completes, earns from
-    CustomerTakso --> Ride : requests, cancels
+    DriverTakso --> Ride
+    CustomerTakso --> Ride
     Ride *-- CustomerTakso
     Ride *-- DriverTakso
 
@@ -112,12 +114,26 @@ rectangle "Takso System" <<context map>> {
 hide <<entity>> circle
 hide <<value object>> circle
 hide <<value object>> methods
-hide <<interface>> circle
+hide <<repository>> circle
 
 
 rectangle "Foodo System" as FoodoSystem <<context map>> {
+
+    entity "User Catalog" as UserCatalogFoodo <<repository>> {
+        getAllUsers() : User[]
+        getUserById(id: string) : User
+        addUser(user: User)
+        removeUser(id: string)
+        getAllCustomers() : Customer[]
+        getCustomerById(id: string) : Customer
+        getAllDrivers() : Driver[]
+        getDriverById(id: string) : Driver
+        authenticate(username: string, password: string) : User
+    }
+
     entity "User" as UserFoodo <<entity>> {
         ID
+        Takso ID
         Username
         Password
         asCustomer() : Customer
@@ -149,7 +165,7 @@ rectangle "Foodo System" as FoodoSystem <<context map>> {
         charge(amount: double)
     }
 
-    entity "Order Catalog" as OrderCatalog <<interface>> {
+    entity "Order Catalog" as OrderCatalog <<repository>> {
         getAllOrders() : Order[]
         getOrderById(id: string) : Order
         addOrder(order: Order)
@@ -189,7 +205,7 @@ rectangle "Foodo System" as FoodoSystem <<context map>> {
 
     OrderFoodo *-- OrderItem
 
-    entity RestaurantCatalog <<interface>> {
+    entity RestaurantCatalog <<repository>> {
         getAllRestaurants() : Restaurant[]
         getRestaurantById(id: string) : Restaurant
         addRestaurant(restaurant: Restaurant)
@@ -226,6 +242,7 @@ rectangle "Foodo System" as FoodoSystem <<context map>> {
         cancelDeliveryFor(orderID: string)
     }
 
+    UserCatalogFoodo o-- UserFoodo
     OrderCatalog o-- OrderFoodo
     OrderItem *-- Meal
     CustomerFoodo --|> UserFoodo
@@ -234,17 +251,17 @@ rectangle "Foodo System" as FoodoSystem <<context map>> {
     ' CustomerFoodo o-- OrderFoodo
     Restaurant --|> UserFoodo
     CustomerFoodo *-- LocationFoodo
-    OrderFoodo <-- CustomerFoodo : creates, pays for
-    OrderFoodo *-- DriverFoodo : takes, completes, earns from
-    OrderFoodo *-- Restaurant : receives, completes
+    OrderFoodo <-- CustomerFoodo
+    OrderFoodo *-- DriverFoodo
+    OrderFoodo *-- Restaurant
     OrderFoodo *-- OrderStatusFoodo
     UserFoodo o-- CardFoodo
     Restaurant *-- LocationFoodo
 }
 
 CustomerFoodo o-- Wallet
-DriverTakso --> OrderFoodo : takes, completes, cancels
+DriverTakso --> OrderFoodo
 OrderFoodo *-- CustomerFoodo
-UserTakso --> UserFoodo
+UserTakso <--> UserFoodo
 
 @enduml
